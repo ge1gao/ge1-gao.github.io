@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SAGA: Gaussian Splatting-based Volumetric Video Compression with Sparse 4D Anchors</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="SAGA: Gaussian Splatting-based volumetric video compression with sparse hierarchical 4D anchors (NeurIPS 2026).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<link rel="stylesheet" href="static/css/index.css">
+<script defer src="static/js/index.js"></script>
+</head>
+<body>
+
+<header class="hero">
+  <h1 class="title"><span class="saga">SAGA</span>: Gaussian Splatting-based Volumetric Video Compression with Sparse 4D Anchors</h1>
+  <p class="authors">
+    <a href="https://scholar.google.com/citations?user=j2_80ewAAAAJ&amp;hl=en">Ge Gao</a><sup>1</sup>,
+    <span>Siyue Teng<sup>1</sup></span>,
+    <span>Changqi Wang<sup>1</sup></span>,
+    <span>Fan Zhang<sup>1</sup></span>,
+    <span>Nantheera Anantrasirichai<sup>1</sup></span>,
+    <span>Jui Chiu Chiang<sup>2</sup></span>,
+    <span>Wen-Hsiao Peng<sup>3</sup></span>,
+    <span>David Bull<sup>1</sup></span>
+  </p>
+  <p class="affiliations">
+    <span><sup>1</sup>Visual Information Lab, University of Bristol, UK</span>
+    <span><sup>2</sup>National Chung Cheng University, Taiwan</span>
+    <span><sup>3</sup>National Yang Ming Chiao Tung University, Taiwan</span>
+  </p>
+  <p class="venue">NeurIPS 2026</p>
+  <nav class="links">
+    <a class="btn" href="https://arxiv.org/pdf/2609.33969">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 0h5.5L14 4.5V15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V1a1 1 0 0 1 1-1zm5 1v4h4L9 1zM5 9h6v1H5V9zm0 2h6v1H5v-1zm0 2h4v1H5v-1z"/></svg>
+      Paper</a>
+    <a class="btn" href="https://arxiv.org/abs/2609.33969">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 1h12v2H2zM2 5h12v2H2zM2 9h8v2H2zM2 13h5v2H2z"/></svg>
+      arXiv</a>
+    <a class="btn" href="https://github.com/ge1-gao/SAGA-NeurIPS26">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      Code</a>
+  </nav>
+</header>
+
+<main>
+
+<section>
+  <div class="tldr">
+    <b>TL;DR</b>
+    <ul>
+      <li>SAGA organises a dynamic Gaussian scene as a hierarchy of sparse anchors placed directly in 4D space-time; fine anchors and Gaussians are decoded from interpolated features of their neighbours.</li>
+      <li>A long-context entropy model with an orthogonally updated memory bank codes the anchors, compressing a 300-frame Neu3D sequence to about 2&nbsp;MB.</li>
+    </ul>
+  </div>
+  <figure>
+    <img src="static/images/teaser.png" alt="SAGA teaser: flat vs. hierarchical 4D anchors, coding cost, and rate-distortion curves on Neu3D">
+    <figcaption>
+      Flat 4D anchors (b) store a feature per anchor; SAGA (c) keeps features only at sparse coarse anchors (30&times; fewer feature-bearing anchors),
+      and its entropy model codes them at about 2 bits per value (d). A 300-frame Neu3D sequence takes 1.91&nbsp;MB, 129&times; smaller than
+      4D Scaffold-GS (a), with the best rate-distortion trade-off among the compared codecs (right).
+    </figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>Abstract</h2>
+  <p class="prose">
+    Immersive video communication requires photorealistic, compact dynamic scene representations that support efficient rendering.
+    3D Gaussian Splatting (3DGS) is a promising approach, but dynamic 3DGS remains difficult to compress due to its dense primitives
+    and spatiotemporal redundancy. Anchor-based formulations improve compactness through sparse scaffolds that share geometry and
+    appearance across primitives. However, existing designs typically deform a single canonical scaffold and condition each primitive
+    solely on its associated anchor, limiting their ability to model non-local dynamics and disocclusions and exploit inter-anchor
+    correlations. To address these limitations, we propose SAGA, a volumetric video codec built on <b>S</b>parse <b>A</b>nchor-assisted
+    <b>GA</b>ussian splatting representations. SAGA represents a dynamic scene using hierarchical sparse anchors in 4D space-time.
+    Coordinate-based INR decoders generate fine anchors and Gaussian primitives from features obtained through kernel interpolation
+    among nearby anchors, enabling parameter sharing across spatiotemporal structures. A fixed-size memory with a novel
+    orthogonality-informed slot-update strategy further captures long-range dependencies among unstructured anchors for entropy coding.
+    Empirically, SAGA achieves PSNR-based BD-rate reductions of 90.88%, 64.30% and 65.14% relative to GIFStream, TED-4DGS, and OMG4,
+    respectively, on the Neu3D testset.
+  </p>
+</section>
+
+<section id="videos">
+  <h2>Video Comparisons</h2>
+  <p class="lead">
+    All methods are rendered along the same camera paths. Labels give the size of the whole compressed sequence and its PSNR / SSIM on the test views.
+  </p>
+  <div class="controls">
+    <div class="control-row">
+      <span class="control-label">Scene</span>
+      <div class="seg" id="scene-seg" role="tablist" aria-label="Scene"></div>
+    </div>
+    <div class="control-row">
+      <span class="control-label">Camera</span>
+      <div class="seg" id="path-seg" role="tablist" aria-label="Camera motion"></div>
+    </div>
+    <p class="path-note" id="path-note"></p>
+  </div>
+  <div class="video-grid" id="video-grid"></div>
+  <div class="player-bar">
+    <button class="btn btn-light" id="play-toggle" type="button">Pause</button>
+    <button class="btn btn-light" id="restart" type="button">Restart</button>
+  </div>
+</section>
+
+<section>
+  <h2>Framework</h2>
+  <figure id="framework-figure">
+    <img src="static/images/framework.png" alt="Overview of SAGA: representation and compression stages">
+    <figcaption>
+      In the representation stage, coarse anchors provide shared spatiotemporal context for fine anchors through
+      localized kernel interpolation, and fine anchors generate Gaussian primitives through INR decoders. In the compression stage,
+      anchors and decoder parameters are quantized and entropy coded with a hierarchical context model, where a recurrent memory bank
+      captures long-range dependencies across sequential coding groups.
+    </figcaption>
+  </figure>
+  <ul class="points prose">
+    <li><b>Anchors in space-time.</b> A greedy dyadic 4D tree, built from short STG warm-ups, places coarse anchors where the scene needs
+      them in space and time, without deforming a single canonical scaffold.</li>
+    <li><b>Inter-anchor decoding.</b> Fine anchors and Gaussians are decoded from features interpolated over their 4D neighbours,
+      not from an isolated parent feature.</li>
+    <li><b>Long-context entropy model.</b> Coding groups are decoded in parallel; a fixed-size memory bank with orthogonalized writes
+      carries context across groups at bounded cost.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Rate-Distortion Performance</h2>
+  <figure>
+    <img src="static/images/rd_n3v_v3.png" alt="Rate-distortion curves on Neu3D">
+    <figcaption>Neu3D. Size of the whole 300-frame sequence on a log scale.</figcaption>
+  </figure>
+  <figure>
+    <img src="static/images/rd_miv_panoptic.png" alt="Rate-distortion curves on MPEG MIV and Panoptic Sports">
+    <figcaption>MPEG MIV and Panoptic Sports in PSNR, SSIM and LPIPS (VGG).</figcaption>
+  </figure>
+  <div class="table-wrap">
+    <table class="bd">
+      <caption>PSNR BD-rate of SAGA against each codec (negative = bitrate saved at equal PSNR)</caption>
+      <thead><tr><th>Codec</th><th>Neu3D</th><th>Panoptic Sports</th><th>MPEG MIV</th></tr></thead>
+      <tbody>
+        <tr><td>TMIV-24.0 (HEVC)</td><td>&ndash;</td><td>&ndash;</td><td>&minus;45.89%</td></tr>
+        <tr><td>TMIV-24.0 (VVenC)</td><td>&ndash;</td><td>&ndash;</td><td>&minus;18.41%</td></tr>
+        <tr><td>4DGC (CVPR'25)</td><td>&minus;62.39%</td><td>&ndash;</td><td>&minus;32.38%</td></tr>
+        <tr><td>GIFStream (CVPR'25)</td><td>&minus;90.88%</td><td>&minus;84.87%</td><td>&minus;67.09%</td></tr>
+        <tr><td>TED-4DGS (WACV'26)</td><td>&minus;64.30%</td><td>&ndash;</td><td>&ndash;</td></tr>
+        <tr><td>D-FCGS (AAAI'26)</td><td>&minus;99.31%</td><td>&ndash;</td><td>&ndash;</td></tr>
+        <tr><td>OMG4 (NeurIPS'26)</td><td>&minus;65.14%</td><td>&ndash;</td><td>&ndash;</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">&ndash; : the rate ranges do not overlap enough for a reliable BD-rate.</p>
+</section>
+
+<section id="bibtex">
+  <h2>BibTeX</h2>
+  <div class="bib">
+    <button class="btn btn-light copy" id="copy-bib" type="button">Copy</button>
+    <pre><code id="bib-text">@inproceedings{gao2026saga,
+  title     = {Gaussian Splatting-based Volumetric Video Compression with Sparse {4D} Anchors},
+  author    = {Gao, Ge and Teng, Siyue and Wang, Changqi and Zhang, Fan and Anantrasirichai, Nantheera and Chiang, Jui Chiu and Peng, Wen-Hsiao and Bull, David},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2026}
+}</code></pre>
+  </div>
+  <h3>Acknowledgments</h3>
+  <p class="prose small">
+    This work was funded by the UKRI MyWorld Strength in Places Programme (SIPF00006/1) and the Royal Society International Exchanges
+    programme (IEC\R3\253264). We thank the University of Bristol Advanced Computing Research Centre and Isambard-AI for providing
+    computational resources. Isambard-AI is funded by the UK Government via UKRI and STFC [ST/AIRR/I-A-I/1023].
+  </p>
+</section>
+
+</main>
+
+<footer>
+  Page layout follows the <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> project page
+  (<a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>).
+</footer>
+
+</body>
+</html>

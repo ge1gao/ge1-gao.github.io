@@ -1,0 +1,178 @@
+/* Layout: one centred reading column (max 960px) in the style of the Nerfies pages; light theme only, as there. */
+:root {
+  --bg: #ffffff;
+  --fg: #2b2d33;
+  --muted: #5d6170;
+  --line: #e3e5ec;
+  --panel: #f5f6f9;
+  --link: #1f8ad9;
+  --accent: #b5303a;
+  --btn: #33363d;
+  --btn-fg: #ffffff;
+  --tldr-bg: #e3effb;
+  --tldr-line: #b9d6f2;
+  --tldr-fg: #12406b;
+  --font: 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+
+.hero, main, footer { max-width: 960px; margin: 0 auto; }
+
+/* Header */
+.hero { text-align: center; padding-block: 3rem 1.5rem; }
+.title {
+  font-size: clamp(1.7rem, 4.2vw, 2.6rem);
+  line-height: 1.22;
+  font-weight: 700;
+  margin: 0 auto 1.2rem;
+  max-width: 880px;
+  text-wrap: balance;
+}
+.title .saga { color: var(--accent); }
+.authors { font-size: 1.08rem; margin: 0 0 0.4rem; }
+.authors > * { white-space: nowrap; }
+.affiliations { color: var(--muted); font-size: 0.95rem; margin: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 0 1.2rem; }
+.venue { font-size: 1.3rem; font-weight: 700; margin: 1rem 0 0; }
+.links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; margin-top: 1.2rem; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 1.15rem;
+  border-radius: 999px;
+  border: 1px solid var(--btn);
+  background: var(--btn);
+  color: var(--btn-fg);
+  font: 600 0.95rem var(--font);
+  cursor: pointer;
+}
+.btn:hover { text-decoration: none; filter: brightness(1.25); }
+.btn svg { width: 1em; height: 1em; fill: currentColor; }
+.btn-light { background: var(--bg); color: var(--fg); border-color: var(--line); font-weight: 600; }
+.btn-light:hover { filter: none; background: var(--panel); }
+
+/* Sections */
+main section { padding-block: 2.2rem; }
+h2 { font-size: 1.75rem; text-align: center; margin: 0 0 1.2rem; text-wrap: balance; }
+h3 { font-size: 1.15rem; margin: 2rem 0 0.5rem; }
+.prose { max-width: 780px; margin: 0 auto; text-align: justify; hyphens: auto; }
+.small { font-size: 0.92rem; color: var(--muted); }
+.lead { max-width: 780px; margin: 0 auto 1.2rem; text-align: center; color: var(--muted); }
+.note { text-align: center; color: var(--muted); font-size: 0.88rem; margin: 0.4rem 0 0; }
+
+.tldr {
+  background: var(--tldr-bg);
+  border: 1px solid var(--tldr-line);
+  color: var(--tldr-fg);
+  border-radius: 8px;
+  padding: 0.9rem 1.2rem;
+  margin-bottom: 1.5rem;
+}
+.tldr ul { margin: 0.3rem 0 0; padding-left: 1.3rem; }
+
+figure { margin: 0 0 2rem; }
+figure img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.16), 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+figcaption { color: var(--muted); font-size: 0.93rem; margin-top: 0.7rem; }
+
+.points { padding-left: 1.3rem; }
+.points li { margin-bottom: 0.5rem; }
+
+/* Video comparisons */
+.controls { display: grid; gap: 0.6rem; margin-bottom: 1rem; }
+.control-row { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+.control-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); width: 4.5rem; }
+.seg { display: flex; flex-wrap: wrap; gap: 0.4rem; min-width: 0; }
+.seg button {
+  font: 600 0.88rem var(--font);
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--fg);
+  cursor: pointer;
+}
+.seg button:hover { background: var(--panel); }
+.seg button[aria-selected="true"] { background: var(--btn); border-color: var(--btn); color: var(--btn-fg); }
+.path-note { margin: 0; color: var(--muted); font-size: 0.9rem; }
+
+.video-grid { display: grid; gap: 0.6rem; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); }
+.tile { min-width: 0; }
+.tile-label { font-size: 0.82rem; line-height: 1.35; margin-bottom: 0.3rem; font-variant-numeric: tabular-nums; }
+.tile-label b { display: block; }
+.tile.ours .tile-label b { color: var(--accent); }
+.tile video, .tile .missing {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: var(--ar, 4 / 3);
+  border-radius: 6px;
+  background: #111317;
+}
+.tile .missing {
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  text-align: center;
+  color: #c9ccd4;
+  font-size: 0.82rem;
+}
+.player-bar { display: flex; justify-content: center; gap: 0.5rem; margin-top: 0.9rem; }
+
+/* Table */
+.table-wrap { overflow-x: auto; margin-top: 0.5rem; }
+table.bd { border-collapse: collapse; margin: 0 auto; font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+table.bd caption { caption-side: top; color: var(--muted); font-size: 0.88rem; padding-bottom: 0.5rem; }
+table.bd th, table.bd td { padding: 0.4rem 0.9rem; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.bd th { text-align: center; border-bottom: 2px solid var(--fg); }
+table.bd th:first-child, table.bd td:first-child { text-align: left; }
+table.bd td:not(:first-child) { text-align: center; }
+
+/* BibTeX */
+.bib { position: relative; }
+.bib pre {
+  margin: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  font: 0.84rem/1.55 var(--mono);
+}
+.bib .copy { position: absolute; top: 0.5rem; right: 0.5rem; padding: 0.25rem 0.8rem; font-size: 0.8rem; }
+
+footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding-block: 2rem 3rem; border-top: 1px solid var(--line); }
+
+@media (max-width: 640px) {
+  .video-grid { grid-template-columns: minmax(0, 1fr); }
+  .control-label { width: auto; }
+  .prose { text-align: left; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
